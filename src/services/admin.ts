@@ -45,7 +45,41 @@ export async function getAllDrivers() {
     throw new Error(error.message);
   }
 }
-
+export async function getAllAvailableDrivers(data: {
+  startDate: Date;
+  startTime: string;
+  endDate: Date;
+  endTime: string;
+}) {
+  try {
+    const drivers = await prisma.driver.findMany();
+    const availableDrivers = drivers.filter((driver) => {
+      const scheduledAssignments = driver.assignedAssignments;
+      if (scheduledAssignments.length == 0) {
+        return true;
+      }
+      const newStartDateTime = new Date(data.startDate);
+      const newEndDateTime = new Date(data.endDate);
+      console.log("INPUT1", newStartDateTime, newEndDateTime);
+      for (let i = 0; i < scheduledAssignments.length; i++) {
+        const assignment = JSON.parse(scheduledAssignments[i]);
+        const assignmentStartDateTime = new Date(assignment.startDate);
+        const assignmentEndDateTime = new Date(assignment.endDate);
+        if (
+          (newStartDateTime >= assignmentStartDateTime &&
+            newStartDateTime <= assignmentEndDateTime) ||
+          (newEndDateTime >= assignmentStartDateTime &&
+            newEndDateTime <= assignmentEndDateTime)
+        ) {
+          console.log("REJECTED", driver.name);
+          return false;
+        }
+      }
+      return true;
+    });
+    return availableDrivers;
+  } catch (error) {}
+}
 export async function createNewAssignment(
   values: createAssignmentType,
   drivers: DriverTypeDetailed[]

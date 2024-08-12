@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,7 @@ import images from "@/constants/images";
 import Image from "next/image";
 import { createDriver } from "@/services/admin";
 import { toast } from "../ui/use-toast";
+import { isWithinRadius } from "@/helpers/haversineDistance";
 const AddDriverBtn = () => {
   const [location, setLocation] = useState<any>(null);
   const [mutex, setMutex] = useState(false);
@@ -65,6 +66,7 @@ const AddDriverBtn = () => {
       });
     }
   }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>

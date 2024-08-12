@@ -18,12 +18,15 @@ import { toast } from "@/components/ui/use-toast";
 import { loginSchema, loginType } from "@/schemas/LoginSchema";
 import { getDriverInfo } from "@/services/driver";
 import { useGlobalContext } from "@/context/GlobalContext";
+import { useRouter } from "next/navigation";
+import { DRIVER_DASHBOARD } from "@/constants/routes/driver.routes";
 const LoginForm = () => {
   const [mutex, setMutex] = useState(false);
   const form = useForm<loginType>({
     resolver: zodResolver(loginSchema),
   });
   const { setLoggedInDriver } = useGlobalContext();
+  const router = useRouter();
   async function onSubmit(values: loginType) {
     try {
       const response = await getDriverInfo(values);
@@ -32,6 +35,7 @@ const LoginForm = () => {
         title: "Success",
         description: "Login successful",
       });
+      router.push(DRIVER_DASHBOARD);
     } catch (error: any) {
       toast({
         title: "Error",

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/use-toast";
 import { AssignmentDetailsType } from "@/constants/types/assignment.types";
+import { useGlobalContext } from "@/context/GlobalContext";
 import {
   getDriverInvites,
   handleAcceptAssignment,
@@ -15,7 +16,9 @@ import React, { Suspense, useEffect, useState } from "react";
 import { RiSteering2Line } from "react-icons/ri";
 
 const Invites = () => {
-  return <InvitesWrapper id="456" />;
+  const { loggedInDriver } = useGlobalContext();
+  if (!loggedInDriver) return null;
+  return <InvitesWrapper id={loggedInDriver.driverId} />;
 };
 
 export default Invites;
@@ -65,11 +68,16 @@ function InvitesWrapper({ id }: { id: string }) {
 function InviteCard({ data }: { data: AssignmentDetailsType }) {
   const [mutex, setMutex] = useState(false);
   const router = useRouter();
+  const { loggedInDriver } = useGlobalContext();
+  if (!loggedInDriver) return null;
   async function handleReject() {
     try {
       setMutex(true);
       const response = await handleRejectAssignment(
-        { id: 5, driverId: "456" },
+        {
+          name: loggedInDriver?.name ?? "",
+          driverId: loggedInDriver?.driverId ?? "",
+        },
         data.assignmentId
       );
       if (!response) {
@@ -96,7 +104,10 @@ function InviteCard({ data }: { data: AssignmentDetailsType }) {
     try {
       setMutex(true);
       const response = await handleAcceptAssignment(
-        { id: 5, driverId: "456", name: "Keshav Aneja" },
+        {
+          name: loggedInDriver?.name ?? "",
+          driverId: loggedInDriver?.driverId ?? "",
+        },
         data.assignmentId
       );
       if (!response) {
@@ -125,7 +136,7 @@ function InviteCard({ data }: { data: AssignmentDetailsType }) {
           <RiSteering2Line />
           <h1>{data.vecicle}</h1>
         </span>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-muted-foreground text-nowrap">
           Posted {formatDistance(new Date(), data.createdAt)} ago
         </span>
       </div>

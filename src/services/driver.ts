@@ -23,7 +23,6 @@ export async function getDriverInvites({ id }: { id: string }) {
 
 export async function handleAcceptAssignment(
   driverDetails: {
-    id: number;
     driverId: string;
     name: string;
   },
@@ -62,7 +61,7 @@ export async function handleAcceptAssignment(
         }
         const driver = await prisma.driver.update({
           where: {
-            id: driverDetails.id,
+            name: driverDetails.name,
             driverId: updatedAssignment.driverId,
           },
           data: {
@@ -85,7 +84,7 @@ export async function handleAcceptAssignment(
 
 export async function handleRejectAssignment(
   driverDetails: {
-    id: number;
+    name: string;
     driverId: string;
   },
   assignmentId: string
@@ -126,7 +125,7 @@ export async function handleRejectAssignment(
         }
         const driverData = await prisma.driver.findUnique({
           where: {
-            id: driverDetails.id,
+            name: driverDetails.name,
             driverId: driverDetails.driverId,
           },
         });
@@ -140,7 +139,7 @@ export async function handleRejectAssignment(
         );
         const driver = await prisma.driver.update({
           where: {
-            id: driverDetails.id,
+            name: driverDetails.name,
             driverId: driverDetails.driverId,
           },
           data: {
