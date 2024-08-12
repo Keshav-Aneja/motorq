@@ -1,11 +1,19 @@
 "use client";
 
 import { DriverType } from "@/constants/types/driver.types";
-import { createContext, ReactNode, useContext, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 type GlobalContextType = {
   drivers: DriverType[];
   setDrivers: React.Dispatch<React.SetStateAction<DriverType[]>>;
+  loggedInDriver: DriverType | null;
+  setLoggedInDriver: React.Dispatch<React.SetStateAction<DriverType | null>>;
 };
 
 export const GlobalContext = createContext<GlobalContextType | null>(null);
@@ -16,8 +24,22 @@ export default function GlobalContextProvider({
   children: ReactNode;
 }) {
   const [drivers, setDrivers] = useState<DriverType[]>([]);
+  const [loggedInDriver, setLoggedInDriver] = useState<DriverType | null>(null);
+  useEffect(() => {
+    const driverInfo = localStorage.getItem("driverInfo");
+    if (driverInfo) {
+      setLoggedInDriver(JSON.parse(driverInfo));
+    }
+  }, []);
+  useEffect(() => {
+    if (loggedInDriver) {
+      localStorage.setItem("driverInfo", JSON.stringify(loggedInDriver));
+    }
+  }, [loggedInDriver]);
   return (
-    <GlobalContext.Provider value={{ drivers, setDrivers }}>
+    <GlobalContext.Provider
+      value={{ drivers, setDrivers, loggedInDriver, setLoggedInDriver }}
+    >
       {children}
     </GlobalContext.Provider>
   );

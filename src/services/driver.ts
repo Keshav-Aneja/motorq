@@ -25,6 +25,7 @@ export async function handleAcceptAssignment(
   driverDetails: {
     id: number;
     driverId: string;
+    name: string;
   },
   assignmentId: string
 ) {
@@ -157,18 +158,15 @@ export async function handleRejectAssignment(
   }
 }
 
-export async function getDriverInfo({
-  id,
-  driverId,
-}: {
-  id: number;
+export async function getDriverInfo(values: {
+  phone: string;
   driverId: string;
 }) {
   try {
     const driver = await prisma.driver.findUnique({
       where: {
-        id,
-        driverId,
+        driverId: values.driverId,
+        phone: values.phone,
       },
     });
     if (!driver) {
@@ -177,5 +175,19 @@ export async function getDriverInfo({
     return driver;
   } catch (error: any) {
     throw new Error(error.message);
+  }
+}
+
+export async function getDriverActiveAssignments(id: string) {
+  try {
+    const assignments = await prisma.assignment.findMany({
+      where: {
+        driverId: id,
+        isAssigned: true,
+      },
+    });
+    return assignments;
+  } catch (error: any) {
+    throw new Error(error.message ?? "Error fetching active assignments");
   }
 }
