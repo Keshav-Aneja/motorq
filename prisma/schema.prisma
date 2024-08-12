@@ -33,10 +33,12 @@ model Assignment{
   driverId String
   isAssigned Boolean @default(false)
   vecicle String
-  requestedTo String[]
+  requestedTo String
   assignmentDate DateTime
-  start DateTime
-  end DateTime
+  startDate DateTime
+  startTime String
+  endDate DateTime
+  endTime String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

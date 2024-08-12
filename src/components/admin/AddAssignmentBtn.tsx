@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,28 +17,63 @@ import {
   FormMessage,
 } from "../ui/form";
 import { useForm } from "react-hook-form";
-import {
-  createDriverSchema,
-  createDriverType,
-} from "@/schemas/createDriverSchema";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 import PlaceAutoComplete from "@/lib/PlaceAutoComplete";
 import images from "@/constants/images";
 import Image from "next/image";
+import { createNewAssignment, getAllDrivers } from "@/services/admin";
+import { useGlobalContext } from "@/context/GlobalContext";
+import {
+  createAssignmentSchema,
+  createAssignmentType,
+} from "@/schemas/createAssignmentSchema";
+import { DriverTypeDetailed } from "../common/DriverDropdown";
+import { vechiles } from "@/constants/data/vechiles";
+import DriverDropdown from "../common/DriverDropdown";
+import { MdClose } from "react-icons/md";
+import Dropdown from "../common/Dropdown";
+import { toast } from "../ui/use-toast";
 const AddDriverBtn = () => {
   const [location, setLocation] = useState<any>(null);
-  const form = useForm<createDriverType>({
-    resolver: zodResolver(createDriverSchema),
+  const { drivers, setDrivers } = useGlobalContext();
+  const [selectedDrivers, setSelectedDrivers] = useState<DriverTypeDetailed[]>(
+    []
+  );
+  const form = useForm<createAssignmentType>({
+    resolver: zodResolver(createAssignmentSchema),
   });
-  async function onSubmit(values: createDriverType) {
-    console.log(values);
-    const data = {
-      ...values,
-      location,
-    };
+  async function onSubmit(values: createAssignmentType) {
+    try {
+      const response = await createNewAssignment(values, selectedDrivers);
+      console.log(response);
+      toast({
+        title: "Success",
+        description: "Ride requested successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message ?? "Something went wrong",
+      });
+    }
   }
+  useEffect(() => {
+    if (drivers.length == 0) {
+      (async () => {
+        const response = await getAllDrivers();
+        setDrivers(response);
+        console.log(response);
+      })();
+    }
+  }, []);
+  function handleSelection(driver: DriverTypeDetailed) {
+    setSelectedDrivers((prev) => [...prev, driver]);
+  }
+  useEffect(() => {
+    console.log(selectedDrivers);
+  }, [selectedDrivers]);
   return (
     <Dialog>
       <DialogTrigger>
@@ -60,73 +95,117 @@ const AddDriverBtn = () => {
             Add a new driver and start assigning rides.
           </DialogDescription>
         </DialogHeader>
+
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col gap-2"
           >
-            <FormField
-              name="name"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm">
-                    Driver Name<strong>*</strong>
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <div className="w-full grid grid-cols-2 gap-3">
+              <FormField
+                name="startDate"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm">
+                      Start Date<strong>*</strong>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="date"
+                        value={field.value?.toString()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="startTime"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm">
+                      Start Time<strong>*</strong>
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} type="time" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="w-full grid grid-cols-2 gap-3">
+              <FormField
+                name="endDate"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm">
+                      End Date<strong>*</strong>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="date"
+                        value={field.value?.toString()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="endTime"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm">
+                      End Time<strong>*</strong>
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} type="time" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <Dropdown
+              data={vechiles}
+              id="vehicle"
+              form={form}
+              label="Vehicle*"
             />
-            <FormField
-              name="phone"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm">
-                    Phone Number<strong>*</strong>
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} type="number" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <DriverDropdown
+              form={form}
+              id="driver"
+              data={drivers as any}
+              label="Select Driver*"
+              onSelect={handleSelection}
             />
-            <FormField
-              name="driverId"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm">
-                    Driver Id<strong>*</strong>
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              name="email"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm">
-                    Email<strong>*</strong>
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <PlaceAutoComplete setValue={setLocation} />
-            <Button className="mt-4">Add Driver</Button>
+            <div className="w-full flex flex-col gap-2">
+              {selectedDrivers &&
+                selectedDrivers.map((driver) => (
+                  <div
+                    key={driver.id}
+                    className="w-full flex items-center p-2 border-[2px] border-primary/10 rounded-md text-xs justify-between"
+                  >
+                    <p>{driver.name}</p>
+                    <MdClose
+                      className="cursor-pointer w-4 h-3"
+                      onClick={() =>
+                        setSelectedDrivers((prev) => {
+                          return prev.filter((item) => item.id !== driver.id);
+                        })
+                      }
+                    />
+                  </div>
+                ))}
+            </div>
+            <Button className="mt-4">Request Ride</Button>
           </form>
         </Form>
       </DialogContent>
