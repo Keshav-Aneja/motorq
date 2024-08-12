@@ -31,11 +31,12 @@ import { createDriver } from "@/services/admin";
 import { toast } from "../ui/use-toast";
 const AddDriverBtn = () => {
   const [location, setLocation] = useState<any>(null);
+  const [mutex, setMutex] = useState(false);
   const form = useForm<createDriverType>({
     resolver: zodResolver(createDriverSchema),
   });
+  const [open, setOpen] = useState(false);
   async function onSubmit(values: createDriverType) {
-    console.log(values);
     if (!location) {
       toast({
         title: "Error",
@@ -44,12 +45,18 @@ const AddDriverBtn = () => {
       });
     }
     try {
+      setMutex(true);
       const driver = await createDriver(values, JSON.stringify(location));
-      toast({
-        title: "Success",
-        description: "Driver created successfully",
-      });
       console.log(driver);
+      if (driver) {
+        toast({
+          title: "Success",
+          description: "Driver created successfully",
+        });
+        form.reset();
+        setOpen(false);
+        setMutex(false);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -59,7 +66,7 @@ const AddDriverBtn = () => {
     }
   }
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
         <div className="flex flex-col items-center gap-2 p-4 px-8 rounded-md border-[2px] border-primary/20 border-dashed bg-main hover:bg-main/80">
           <Image
@@ -145,7 +152,9 @@ const AddDriverBtn = () => {
               )}
             />
             <PlaceAutoComplete setValue={setLocation} fullAdd={true} />
-            <Button className="mt-4">Add Driver</Button>
+            <Button className="mt-4" disabled={mutex}>
+              Add Driver
+            </Button>
           </form>
         </Form>
       </DialogContent>

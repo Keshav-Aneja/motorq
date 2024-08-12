@@ -70,3 +70,19 @@
 input[type="number"] {
   -moz-appearance: textfield;
 }
+.scroll-menu {
+  display: grid;
+  grid-auto-flow: column;
+
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  overscroll-behavior-inline: contain;
+}
+.scroll-menu:active {
+  cursor: grabbing;
+}
+.scroll-menu::-webkit-scrollbar {
+  width: 0em;
+  height: 0em;
+  scrollbar-width: none;
+}

@@ -4,26 +4,24 @@ import { LuUser } from "react-icons/lu";
 import { RiSteering2Fill } from "react-icons/ri";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAssignments } from "@/services/admin";
+import { getRecentAssignments } from "@/services/admin";
 import { AssignmentDetailsType } from "@/constants/types/assignment.types";
 import { cn } from "@/lib/utils";
 const RecentAssignments = () => {
   return (
-    <div className="w-full h-fit">
-      <Suspense
-        fallback={[1, 2, 3].map((card, index) => (
-          <AssignmentCardSkeleton key={index} />
-        ))}
-      >
-        <AssignmentCardWrapper />
-      </Suspense>
-    </div>
+    <Suspense
+      fallback={[1, 2, 3].map((card, index) => (
+        <AssignmentCardSkeleton key={index} />
+      ))}
+    >
+      <AssignmentCardWrapper />
+    </Suspense>
   );
 };
 
 export default RecentAssignments;
 async function AssignmentCardWrapper() {
-  const assignments = await getAssignments(0, 6);
+  const assignments = await getRecentAssignments(3);
   return assignments.map((assignment) => (
     <AssignmentCard key={assignment.id} data={assignment} />
   ));
@@ -60,7 +58,7 @@ function AssignmentCard({ data }: { data: AssignmentDetailsType }) {
           <div className="flex flex-col gap-0">
             <span className="flex items-center gap-2 text-base font-medium">
               <LuUser />
-              <p>John Doe</p>
+              <p>{data.driverId}</p>
             </span>
             <p className="text-muted-foreground text-xs self-end">ID: 2345</p>
           </div>

@@ -35,23 +35,29 @@ import DriverDropdown from "../common/DriverDropdown";
 import { MdClose } from "react-icons/md";
 import Dropdown from "../common/Dropdown";
 import { toast } from "../ui/use-toast";
+import { useRouter } from "next/navigation";
 const AddDriverBtn = () => {
-  const [location, setLocation] = useState<any>(null);
+  const [mutex, setMutex] = useState(false);
   const { drivers, setDrivers } = useGlobalContext();
   const [selectedDrivers, setSelectedDrivers] = useState<DriverTypeDetailed[]>(
     []
   );
+  const [open, setOpen] = useState(false);
   const form = useForm<createAssignmentType>({
     resolver: zodResolver(createAssignmentSchema),
   });
+  const router = useRouter();
   async function onSubmit(values: createAssignmentType) {
     try {
+      setMutex(true);
       const response = await createNewAssignment(values, selectedDrivers);
-      console.log(response);
       toast({
         title: "Success",
         description: "Ride requested successfully",
       });
+      setMutex(false);
+      setOpen(false);
+      router.refresh();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -75,7 +81,7 @@ const AddDriverBtn = () => {
     console.log(selectedDrivers);
   }, [selectedDrivers]);
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
         <div className="flex flex-col items-center gap-2 p-4 px-8 rounded-md border-[2px] border-primary/20 border-dashed bg-main hover:bg-main/80">
           <Image
@@ -205,7 +211,9 @@ const AddDriverBtn = () => {
                   </div>
                 ))}
             </div>
-            <Button className="mt-4">Request Ride</Button>
+            <Button className="mt-4" disabled={mutex}>
+              Request Ride
+            </Button>
           </form>
         </Form>
       </DialogContent>

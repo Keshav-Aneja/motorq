@@ -16,11 +16,12 @@ datasource db {
 
 model Driver{
   id Int @id @default(autoincrement())
-  driverId String
+  driverId String @unique
   name String
   email String
   phone String
   scheduledAssignments String[] @default([])
+  assignedAssignments String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   location String 
