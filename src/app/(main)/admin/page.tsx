@@ -1,3 +1,4 @@
+import AddAssignmentBtn from "@/components/admin/AddAssignmentBtn";
 import AddDriverBtn from "@/components/admin/AddDriverBtn";
 import Sidebar from "@/components/admin/Sidebar";
 import Navbar from "@/components/common/Navbar";
@@ -20,7 +21,10 @@ export default function AdminDashboard() {
                 <p>Welcome back</p>
               </div>
             </section>
-            <AddDriverBtn />
+            <div className="flex items-center gap-4">
+              <AddDriverBtn />
+              <AddAssignmentBtn />
+            </div>
           </div>
         </div>
       </main>

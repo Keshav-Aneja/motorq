@@ -123,7 +123,7 @@ export default function PlaceAutocomplete({
   return (
     <div
       className={cn(
-        "relative w-full md:w-[80%] flex flex-col gap-2",
+        "relative w-full flex flex-col gap-2",
         error && "text-destructive",
         className
       )}

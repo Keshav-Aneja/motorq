@@ -27,8 +27,6 @@ import { Button } from "../ui/button";
 import PlaceAutoComplete from "@/lib/PlaceAutoComplete";
 import images from "@/constants/images";
 import Image from "next/image";
-import { createDriver } from "@/services/admin";
-import { toast } from "../ui/use-toast";
 const AddDriverBtn = () => {
   const [location, setLocation] = useState<any>(null);
   const form = useForm<createDriverType>({
@@ -36,40 +34,23 @@ const AddDriverBtn = () => {
   });
   async function onSubmit(values: createDriverType) {
     console.log(values);
-    if (!location) {
-      toast({
-        title: "Error",
-        description: "Please select a location",
-        variant: "destructive",
-      });
-    }
-    try {
-      const driver = await createDriver(values, JSON.stringify(location));
-      toast({
-        title: "Success",
-        description: "Driver created successfully",
-      });
-      console.log(driver);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message ?? "Cannot create driver at the moment",
-        variant: "destructive",
-      });
-    }
+    const data = {
+      ...values,
+      location,
+    };
   }
   return (
     <Dialog>
       <DialogTrigger>
         <div className="flex flex-col items-center gap-2 p-4 px-8 rounded-md border-[2px] border-primary/20 border-dashed bg-main hover:bg-main/80">
           <Image
-            src={images.Driver}
-            alt="Driver"
+            src={images.Ride}
+            alt="Ride"
             width={200}
             height={200}
             className="w-8 h-auto invert"
           />
-          <p className="text-sm font-medium text-white">Add new Driver</p>
+          <p className="text-sm font-medium text-white">Assign a new ride</p>
         </div>
       </DialogTrigger>
       <DialogContent>
@@ -144,7 +125,7 @@ const AddDriverBtn = () => {
                 </FormItem>
               )}
             />
-            <PlaceAutoComplete setValue={setLocation} fullAdd={true} />
+            <PlaceAutoComplete setValue={setLocation} />
             <Button className="mt-4">Add Driver</Button>
           </form>
         </Form>
