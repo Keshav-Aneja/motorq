@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL") 
+}
+
+model Driver{
+  id Int @id @default(autoincrement())
+  driverId String
+  name String
+  email String
+  phone String
+  scheduledAssignments String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  location String 
+  isCurrentlyBusy Boolean
+}
+
+model Assignment{
+  id Int @id @default(autoincrement())
+  assignmentId String @unique @default(nanoid(5))
+  driverId String
+  isAssigned Boolean @default(false)
+  vecicle String
+  requestedTo String[]
+  assignmentDate DateTime
+  start DateTime
+  end DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

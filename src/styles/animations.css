@@ -1,0 +1,13 @@
+.loader-text {
+  animation: blink 1.5s infinite ease-in-out alternate-reverse;
+}
+@keyframes blink {
+  from {
+    opacity: 1;
+    scale: 100%;
+  }
+  to {
+    opacity: 0.5;
+    scale: 96%;
+  }
+}
