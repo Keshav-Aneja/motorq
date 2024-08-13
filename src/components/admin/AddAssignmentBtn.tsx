@@ -44,6 +44,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { isWithinRadius } from "@/helpers/haversineDistance";
 import { DriverType } from "@/constants/types/driver.types";
+import { ImSpinner2 } from "react-icons/im";
 
 const AddDriverBtn = () => {
   const [mutex, setMutex] = useState(false);
@@ -285,6 +286,12 @@ const AddDriverBtn = () => {
                     </TabsTrigger>
                   </TabsList>
                   <TabsContent value="byName">
+                    {loadingDrivers && (
+                      <span className="flex items-center justify-center w-full">
+                        <p>Loading</p>
+                        <ImSpinner2 className="animate-spin" />
+                      </span>
+                    )}
                     {!loadingDrivers && (
                       <DriverDropdown
                         form={form}
