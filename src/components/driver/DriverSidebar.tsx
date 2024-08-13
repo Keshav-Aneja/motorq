@@ -13,8 +13,15 @@ import Image from "next/image";
 import images from "@/constants/images";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useGlobalContext } from "@/context/GlobalContext";
+import {
+  DRIVER_ASSIGNMENTS,
+  DRIVER_DASHBOARD,
+} from "@/constants/routes/driver.routes";
 const Sidebar = () => {
   const path = usePathname();
+  const { loggedInDriver } = useGlobalContext();
+  if (!loggedInDriver) return null;
   return (
     <section className="flex flex-col w-full h-full gap-4 p-3">
       <div className="w-full flex items-center justify-between">
@@ -27,22 +34,26 @@ const Sidebar = () => {
             className="w-16"
           />
           <div className="flex flex-col">
-            <h1 className="text-xl font-semibold">Hey, Keshav</h1>
-            <p className="text-sm">Welcome back</p>
+            <h1 className="text-xl font-semibold">
+              Hey, {loggedInDriver.name}
+            </h1>
+            <p className="text-sm text-muted">
+              ID : {loggedInDriver?.driverId}
+            </p>
           </div>
         </section>
       </div>
-      <h1 className="text-muted-foreground ">Admin Dashboard</h1>
+      <h1 className="text-muted-foreground ">Driver Dashboard</h1>
       <Button
         asChild
         variant={"ghost"}
         className="justify-start hover:bg-main hover:text-white"
       >
         <Link
-          href={ADMIN_DASHBOARD}
+          href={DRIVER_DASHBOARD}
           className={cn(
             "gap-2 text-muted-foreground text-lg",
-            !path.includes(ADMIN_ASSIGNMENTS) && "bg-main  text-white"
+            !path.includes(DRIVER_ASSIGNMENTS) && "bg-main  text-white"
           )}
         >
           <MdSpaceDashboard size={20} />

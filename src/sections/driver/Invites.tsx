@@ -130,7 +130,7 @@ function InviteCard({ data }: { data: AssignmentDetailsType }) {
     }
   }
   return (
-    <div className="border-[2px] border-primary/10 rounded-lg p-4 w-full flex flex-col gap-4">
+    <div className=" bg-white border-[2px] border-primary/10 rounded-lg p-4 w-full flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-1 text-sm">
           <RiSteering2Line />
@@ -177,7 +177,7 @@ function InviteCard({ data }: { data: AssignmentDetailsType }) {
 
 function InviteCardSkeleton() {
   return (
-    <div className="border-[2px] border-primary/10 rounded-lg p-4 w-full flex flex-col gap-4">
+    <div className="bg-white border-[2px] border-primary/10 rounded-lg p-4 w-full flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <Skeleton>
           <span className="flex items-center gap-1 text-sm opacity-0">

@@ -3,11 +3,21 @@ import Navbar from "@/components/common/Navbar";
 import React, { ReactNode } from "react";
 const Layout = ({ children }: { children: ReactNode }) => {
   return (
-    <div className="w-full flex flex-col min-h-screen">
+    <div className="w-full flex flex-col gap-0 min-h-screen bg-[#f5f5f5]">
       <Navbar />
-      <main className="w-[90%] h-full mx-auto flex items-start justify-between gap-4">
-        <Sidebar />
-        {children}
+      <main className="w-full h-full  flex items-start justify-between -mt-6">
+        <div
+          className="w-[20%] h-full bg-white"
+          style={{ height: "calc(100vh - 60px" }}
+        >
+          <Sidebar />
+        </div>
+        <div
+          className="w-[90%] overflow-y-auto"
+          style={{ minHeight: "calc(100vh - 60px" }}
+        >
+          {children}
+        </div>
       </main>
     </div>
   );

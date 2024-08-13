@@ -6,8 +6,8 @@ import React from "react";
 
 const page = () => {
   return (
-    <div className="w-[90%] h-[80vh] border-l-[2px] flex flex-col gap-8 border-primary/20 pl-12">
-      <DriverProfileBox />
+    <div className="w-[90%] h-full border-l-[2px] flex flex-col gap-8 border-primary/5 pl-12 pt-6">
+      {/* <DriverProfileBox /> */}
       <section>
         <h1 className="text-3xl font-semibold">Invites</h1>
         <Invites />

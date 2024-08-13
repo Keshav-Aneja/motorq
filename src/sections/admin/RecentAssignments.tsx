@@ -28,7 +28,7 @@ async function AssignmentCardWrapper() {
 }
 function AssignmentCard({ data }: { data: AssignmentDetailsType }) {
   return (
-    <div className="w-full h-fit min-h-60 p-4 rounded-lg border-[2px] border-primary/10 flex flex-col gap-4">
+    <div className="bg-white w-full h-fit min-h-60 p-4 rounded-lg border-[2px] border-primary/10 flex flex-col gap-4">
       <span
         className={cn(
           "w-fit self-end px-4 py-1 rounded-full bg-main text-xs text-white",
@@ -89,7 +89,7 @@ function AssignmentCard({ data }: { data: AssignmentDetailsType }) {
 
 function AssignmentCardSkeleton() {
   return (
-    <div className="w-full h-fit min-h-60 p-4 rounded-lg border-[2px] border-primary/10 flex flex-col gap-4">
+    <div className="w-full bg-white h-fit min-h-60 p-4 rounded-lg border-[2px] border-primary/10 flex flex-col gap-4">
       <Skeleton>
         {" "}
         <span className="w-fit self-end px-4 py-1 rounded-full bg-main text-xs text-white opacity-0">

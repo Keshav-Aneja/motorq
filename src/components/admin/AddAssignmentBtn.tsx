@@ -206,15 +206,22 @@ const AddDriverBtn = () => {
       <PostedPopup showPopup={postSuccessPopup} label="Ride Requested " />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger>
-          <div className="flex flex-col items-center gap-2 p-4 px-8 rounded-md border-[2px] border-primary/20 border-dashed bg-main hover:bg-main/80">
-            <Image
-              src={images.Ride}
-              alt="Ride"
-              width={200}
-              height={200}
-              className="w-8 h-auto invert"
-            />
-            <p className="text-sm font-medium text-white">Assign a new ride</p>
+          <div className="aspect-square flex items-center justify-center gap-4 flex-col group cursor-pointer">
+            <span className=" rounded-lg w-[60%] aspect-square flex items-center justify-center text-white bg-main transition-all duration-200 ease-linear ">
+              <Image
+                src={images.Ride}
+                alt="Ride"
+                width={200}
+                height={200}
+                className="w-16 group-hover:scale-125 invert transition-all duration-200 ease-linear "
+              />
+            </span>
+            <span className="text-center w-[70%] ">
+              <p className="text-xl ">Assign new ride</p>
+              <p className="text-xs">
+                Click here to assign a new ride to a driver
+              </p>
+            </span>
           </div>
         </DialogTrigger>
         <DialogContent
