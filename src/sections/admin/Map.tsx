@@ -16,8 +16,15 @@ L.Icon.Default.mergeOptions({
 
 export default function Map() {
   const [position, setPosition] = useState<[number, number] | null>(null);
+  const [mounted, setMounted] = useState(false);
   const { locationDrivers } = useGlobalContext();
   const [markerPosition, setMarkerPositions] = useState<[number, number][]>([]);
+  useEffect(() => {
+    if (typeof window !== undefined) {
+      setMounted(true);
+    }
+  }, []);
+
   useEffect(() => {
     if (locationDrivers && locationDrivers.length > 0) {
       const positions: [number, number][] = locationDrivers.map((driver) => {
@@ -42,7 +49,9 @@ export default function Map() {
       );
     }
   }, []);
-
+  if (!mounted) {
+    return null;
+  }
   return (
     <div className="border-2 border-primary/20 shadow-xl rounded-xl overflow-hidden">
       {position ? (

@@ -44,17 +44,14 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { isWithinRadius } from "@/helpers/haversineDistance";
 import { DriverType } from "@/constants/types/driver.types";
-import Map from "@/sections/admin/Map";
-import dynamic from "next/dynamic";
-const UserLocationMap = dynamic(() => import("@/sections/admin/Map"), {
-  ssr: false,
-});
+
 const AddDriverBtn = () => {
   const [mutex, setMutex] = useState(false);
   const { drivers, setDrivers, setLocationDrivers } = useGlobalContext();
   const [selectedDrivers, setSelectedDrivers] = useState<DriverTypeDetailed[]>(
     []
   );
+  const [mounted, setMounted] = useState(false);
   const [allCurrentDrivers, setAllCurrentDrivers] = useState<DriverType[]>([]);
   const [location, setLocation] = useState<any>(null);
   const [open, setOpen] = useState(false);
@@ -136,6 +133,14 @@ const AddDriverBtn = () => {
   useEffect(() => {
     console.log(locationTabActive);
   }, [locationTabActive]);
+  useEffect(() => {
+    if (typeof window !== undefined) {
+      setMounted(true);
+    }
+  }, []);
+  if (!mounted) {
+    return null;
+  }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>

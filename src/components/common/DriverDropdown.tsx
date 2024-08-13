@@ -1,6 +1,6 @@
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useForm, UseFormReturn } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -62,13 +62,18 @@ export default function DriverDropdown({
   showMap,
 }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [mounted, setMounted] = useState(false);
   const filteredData = data.filter((driver) =>
     `${driver.name} ${driver.phone}`
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
   );
-
+  useEffect(() => {
+    if (typeof window !== undefined) {
+      setMounted(true);
+    }
+  }, []);
+  if (!mounted) return null;
   return (
     <>
       <FormField
@@ -141,11 +146,11 @@ export default function DriverDropdown({
           </FormItem>
         )}
       />
-      {showMap && (
+      {/* {showMap && (
         <>
           <Map />
         </>
-      )}
+      )} */}
     </>
   );
 }

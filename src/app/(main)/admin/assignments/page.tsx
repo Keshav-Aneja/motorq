@@ -3,7 +3,7 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AllAssignments from "@/sections/admin/AllAssignments";
 
-const page = () => {
+const AssignmentPage = () => {
   return (
     <div className="w-[90%] h-[80vh] border-l-[2px] flex flex-col gap-8 border-primary/20 pl-12">
       <h1 className="text-3xl font-semibold">Assignments</h1>
