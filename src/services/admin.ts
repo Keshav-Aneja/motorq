@@ -3,6 +3,8 @@ import { createDriverType } from "@/schemas/createDriverSchema";
 import { prisma } from "../lib/prisma";
 import { createAssignmentType } from "@/schemas/createAssignmentSchema";
 import { DriverTypeDetailed } from "@/components/common/DriverDropdown";
+import { AssignmentDetailsType } from "@/constants/types/assignment.types";
+import { DriverType } from "@/constants/types/driver.types";
 
 export async function createDriver(data: createDriverType, location: string) {
   try {
@@ -158,6 +160,7 @@ export async function getActiveAssignments(
     if (!response) {
       throw new Error("Cannot fetch assignments at the moment");
     }
+    console.log(response);
     return response;
   } catch (error: any) {
     throw new Error(error.message);
@@ -181,5 +184,97 @@ export async function getPendingAssignments(
     return response;
   } catch (error: any) {
     throw new Error(error.message);
+  }
+}
+
+export async function handleManualAssignment(
+  item: AssignmentDetailsType,
+  driver: DriverType
+) {
+  try {
+    const response = await prisma.$transaction(async (prisma) => {
+      const assignment = await prisma.assignment.update({
+        where: {
+          id: item.id,
+        },
+        data: {
+          isAssigned: true,
+          driverId: driver.driverId,
+        },
+      });
+      if (!assignment) {
+        throw new Error("Cannot assign driver to the assignment");
+      }
+      const driverAssignments = await prisma.driver.update({
+        where: {
+          name: driver.name,
+          driverId: driver.driverId,
+        },
+        data: {
+          assignedAssignments: {
+            push: JSON.stringify(assignment),
+          },
+        },
+      });
+      return driverAssignments;
+    });
+    return response;
+  } catch (error: any) {
+    throw new Error(error.message ?? "Cannot assign driver to the assignment");
+  }
+}
+export async function handleManualUnAssignment(
+  item: AssignmentDetailsType,
+  driver: DriverType
+) {
+  try {
+    const response = await prisma.$transaction(async (prisma) => {
+      const assignment = await prisma.assignment.update({
+        where: {
+          id: item.id,
+        },
+        data: {
+          isAssigned: false,
+          driverId: "",
+        },
+      });
+      if (!assignment) {
+        throw new Error("Cannot unassign driver from the assignment");
+      }
+
+      const driverData = await prisma.driver.findUnique({
+        where: {
+          driverId: driver.driverId,
+        },
+        select: {
+          assignedAssignments: true,
+        },
+      });
+
+      if (!driverData) {
+        throw new Error("Driver not found");
+      }
+
+      const updatedAssignments = driverData.assignedAssignments.filter(
+        (assignedAssignment) =>
+          JSON.parse(assignedAssignment).id !== assignment.id
+      );
+
+      const driverAssignments = await prisma.driver.update({
+        where: {
+          driverId: driver.driverId,
+        },
+        data: {
+          assignedAssignments: updatedAssignments,
+        },
+      });
+
+      return driverAssignments;
+    });
+    return response;
+  } catch (error: any) {
+    throw new Error(
+      error.message ?? "Cannot unassign driver from the assignment"
+    );
   }
 }

@@ -16,7 +16,7 @@ const page = () => {
           <AllAssignments status="active" />
         </TabsContent>
         <TabsContent value="pending">
-          <AllAssignments status="active" />
+          <AllAssignments status="pending" />
         </TabsContent>
       </Tabs>
     </div>

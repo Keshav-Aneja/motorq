@@ -44,15 +44,21 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { isWithinRadius } from "@/helpers/haversineDistance";
 import { DriverType } from "@/constants/types/driver.types";
+import Map from "@/sections/admin/Map";
+import dynamic from "next/dynamic";
+const UserLocationMap = dynamic(() => import("@/sections/admin/Map"), {
+  ssr: false,
+});
 const AddDriverBtn = () => {
   const [mutex, setMutex] = useState(false);
-  const { drivers, setDrivers } = useGlobalContext();
+  const { drivers, setDrivers, setLocationDrivers } = useGlobalContext();
   const [selectedDrivers, setSelectedDrivers] = useState<DriverTypeDetailed[]>(
     []
   );
   const [allCurrentDrivers, setAllCurrentDrivers] = useState<DriverType[]>([]);
   const [location, setLocation] = useState<any>(null);
   const [open, setOpen] = useState(false);
+  const [locationTabActive, setLocationTabActive] = useState(false);
   const [stage, setStage] = useState(1);
   const [loadingDrivers, setLoadingDrivers] = useState(false);
   const form = useForm<createAssignmentType>({
@@ -112,7 +118,7 @@ const AddDriverBtn = () => {
   }
   useEffect(() => {
     if (location) {
-      setAllCurrentDrivers((prev: any) => {
+      const updatedDrivers = (prev: any) => {
         const lat2 = location.lat;
         const lng2 = location.lng;
         const radius = 25;
@@ -122,9 +128,14 @@ const AddDriverBtn = () => {
           console.log(lat, lng);
           return isWithinRadius(lat, lng, lat2, lng2, radius);
         });
-      });
+      };
+      setAllCurrentDrivers(updatedDrivers);
+      setLocationDrivers(updatedDrivers);
     }
   }, [location]);
+  useEffect(() => {
+    console.log(locationTabActive);
+  }, [locationTabActive]);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
@@ -139,7 +150,14 @@ const AddDriverBtn = () => {
           <p className="text-sm font-medium text-white">Assign a new ride</p>
         </div>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent
+        className={cn(
+          stage === 2 &&
+            locationTabActive &&
+            location &&
+            "w-full max-w-[80vw] max-h-[95vh] h-full"
+        )}
+      >
         <DialogHeader>
           <DialogTitle>
             {stage === 1 ? "Add new assignment" : "Available Drivers"}
@@ -248,8 +266,18 @@ const AddDriverBtn = () => {
               <form>
                 <Tabs defaultValue="byName" className="w-full">
                   <TabsList>
-                    <TabsTrigger value="byName">By Name or Phone</TabsTrigger>
-                    <TabsTrigger value="byLocation">By Location</TabsTrigger>
+                    <TabsTrigger
+                      value="byName"
+                      onClick={() => setLocationTabActive(false)}
+                    >
+                      By Name or Phone
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="byLocation"
+                      onClick={() => setLocationTabActive(true)}
+                    >
+                      By Location
+                    </TabsTrigger>
                   </TabsList>
                   <TabsContent value="byName">
                     {!loadingDrivers && (
@@ -268,6 +296,10 @@ const AddDriverBtn = () => {
                         setValue={setLocation}
                         fullAdd={true}
                       />
+                      <p className="text-xs text-muted-foreground -mt-2">
+                        Drivers within 25km of the current address will be
+                        visible
+                      </p>
                       {location && (
                         <DriverDropdown
                           form={form}
@@ -275,8 +307,10 @@ const AddDriverBtn = () => {
                           data={allCurrentDrivers as any}
                           label="Select Driver*"
                           onSelect={handleSelection}
+                          showMap={true}
                         />
                       )}
+                      {/* <UserLocationMap /> */}
                     </div>
                   </TabsContent>
                 </Tabs>
