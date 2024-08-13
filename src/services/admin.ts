@@ -47,6 +47,41 @@ export async function getAllDrivers() {
     throw new Error(error.message);
   }
 }
+// export async function getAllAvailableDrivers(data: {
+//   startDate: Date;
+//   startTime: string;
+//   endDate: Date;
+//   endTime: string;
+// }) {
+//   try {
+//     const drivers = await prisma.driver.findMany();
+//     const availableDrivers = drivers.filter((driver) => {
+//       const scheduledAssignments = driver.assignedAssignments;
+//       if (scheduledAssignments.length == 0) {
+//         return true;
+//       }
+//       const newStartDateTime = new Date(data.startDate);
+//       const newEndDateTime = new Date(data.endDate);
+//       console.log("INPUT1", newStartDateTime, newEndDateTime);
+//       for (let i = 0; i < scheduledAssignments.length; i++) {
+//         const assignment = JSON.parse(scheduledAssignments[i]);
+//         const assignmentStartDateTime = new Date(assignment.startDate);
+//         const assignmentEndDateTime = new Date(assignment.endDate);
+//         if (
+//           (newStartDateTime >= assignmentStartDateTime &&
+//             newStartDateTime <= assignmentEndDateTime) ||
+//           (newEndDateTime >= assignmentStartDateTime &&
+//             newEndDateTime <= assignmentEndDateTime)
+//         ) {
+//           console.log("REJECTED", driver.name);
+//           return false;
+//         }
+//       }
+//       return true;
+//     });
+//     return availableDrivers;
+//   } catch (error) {}
+// }
 export async function getAllAvailableDrivers(data: {
   startDate: Date;
   startTime: string;
@@ -60,18 +95,51 @@ export async function getAllAvailableDrivers(data: {
       if (scheduledAssignments.length == 0) {
         return true;
       }
+
+      const [startHours, startMinutes] = data.startTime.split(":").map(Number);
+      const [endHours, endMinutes] = data.endTime.split(":").map(Number);
+
       const newStartDateTime = new Date(data.startDate);
+      newStartDateTime.setHours(startHours, startMinutes, 0, 0);
+
       const newEndDateTime = new Date(data.endDate);
+      newEndDateTime.setHours(endHours, endMinutes, 0, 0);
+
       console.log("INPUT1", newStartDateTime, newEndDateTime);
+
       for (let i = 0; i < scheduledAssignments.length; i++) {
         const assignment = JSON.parse(scheduledAssignments[i]);
+
+        // Combine the assignment start date with the start time
         const assignmentStartDateTime = new Date(assignment.startDate);
+        const [assignmentStartHours, assignmentStartMinutes] =
+          assignment.startTime.split(":").map(Number);
+        assignmentStartDateTime.setHours(
+          assignmentStartHours,
+          assignmentStartMinutes,
+          0,
+          0
+        );
+
+        // Combine the assignment end date with the end time
         const assignmentEndDateTime = new Date(assignment.endDate);
+        const [assignmentEndHours, assignmentEndMinutes] = assignment.endTime
+          .split(":")
+          .map(Number);
+        assignmentEndDateTime.setHours(
+          assignmentEndHours,
+          assignmentEndMinutes,
+          0,
+          0
+        );
+
         if (
           (newStartDateTime >= assignmentStartDateTime &&
             newStartDateTime <= assignmentEndDateTime) ||
           (newEndDateTime >= assignmentStartDateTime &&
-            newEndDateTime <= assignmentEndDateTime)
+            newEndDateTime <= assignmentEndDateTime) ||
+          (assignmentStartDateTime >= newStartDateTime &&
+            assignmentStartDateTime <= newEndDateTime)
         ) {
           console.log("REJECTED", driver.name);
           return false;
@@ -80,8 +148,12 @@ export async function getAllAvailableDrivers(data: {
       return true;
     });
     return availableDrivers;
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
+
 export async function createNewAssignment(
   values: createAssignmentType,
   drivers: DriverTypeDetailed[]

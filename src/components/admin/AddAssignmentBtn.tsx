@@ -86,6 +86,14 @@ const AddDriverBtn = () => {
     }
   }
   async function onSubmit(values: createAssignmentType) {
+    if (values.startDate > values.endDate) {
+      toast({
+        title: "Error",
+        description: "Start date cannot be greater than end date",
+        variant: "destructive",
+      });
+      return;
+    }
     setFormData(values);
     setStage(2);
     try {
@@ -320,6 +328,7 @@ const AddDriverBtn = () => {
                           label="Select Driver*"
                           onSelect={handleSelection}
                           showMap={true}
+                          location={location}
                         />
                       )}
                       {/* <UserLocationMap /> */}

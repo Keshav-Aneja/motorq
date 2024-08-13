@@ -49,6 +49,7 @@ type Props = {
   includeSearch?: boolean;
   onSelect: (driver: DriverTypeDetailed) => void;
   showMap?: boolean;
+  location?: any;
 };
 
 export default function DriverDropdown({
@@ -60,6 +61,7 @@ export default function DriverDropdown({
   includeSearch = true,
   onSelect,
   showMap,
+  location,
 }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [mounted, setMounted] = useState(false);
@@ -146,11 +148,11 @@ export default function DriverDropdown({
           </FormItem>
         )}
       />
-      {/* {showMap && (
+      {showMap && (
         <>
-          <Map />
+          <Map location={location} />
         </>
-      )} */}
+      )}
     </>
   );
 }

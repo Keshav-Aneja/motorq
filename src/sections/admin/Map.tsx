@@ -14,7 +14,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
 
-export default function Map() {
+export default function Map({ location }: { location: any }) {
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [mounted, setMounted] = useState(false);
   const { locationDrivers } = useGlobalContext();
@@ -37,18 +37,23 @@ export default function Map() {
     }
   }, []);
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setPosition([position.coords.latitude, position.coords.longitude]);
-        },
-        (error) => {
-          setPosition([28.5355, 77.391]);
-          console.error("Error getting location: ", error);
-        }
-      );
+    if (location) {
+      setPosition([location.lat, location.lng]);
     }
-  }, []);
+  }, [location]);
+  // useEffect(() => {
+  //   if (typeof window !== undefined && navigator.geolocation) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         setPosition([position.coords.latitude, position.coords.longitude]);
+  //       },
+  //       (error) => {
+  //         setPosition([28.5355, 77.391]);
+  //         console.error("Error getting location: ", error);
+  //       }
+  //     );
+  //   }
+  // }, []);
   if (!mounted) {
     return null;
   }
