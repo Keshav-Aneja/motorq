@@ -67,61 +67,10 @@ function AssignmentsWrapper({ id }: { id: string }) {
 }
 
 function AssignmentCard({ data }: { data: AssignmentDetailsType }) {
+  const { loggedInDriver } = useGlobalContext();
   const [mutex, setMutex] = useState(false);
   const router = useRouter();
-  async function handleReject() {
-    try {
-      setMutex(true);
-      const response = await handleRejectAssignment(
-        { id: 5, driverId: "456" },
-        data.assignmentId
-      );
-      if (!response) {
-        console.log("Here");
-        throw new Error("Error rejecting assignment. Please try again later");
-      }
-      setMutex(false);
-      toast({
-        title: "Success",
-        description: "Assignment rejected successfully",
-      });
-      router.refresh();
-    } catch (error: any) {
-      setMutex(false);
-      toast({
-        title: "Error",
-        description:
-          error.message ?? "Error rejecting assignment. Please try again later",
-        variant: "destructive",
-      });
-    }
-  }
-  async function handleAccept() {
-    try {
-      setMutex(true);
-      const response = await handleAcceptAssignment(
-        { id: 5, driverId: "456", name: "Keshav Aneja" },
-        data.assignmentId
-      );
-      if (!response) {
-        throw new Error("Error accepting assignment. Please try again later");
-      }
-      setMutex(false);
-      toast({
-        title: "Success",
-        description: "Assignment accepted successfully",
-      });
-      router.refresh();
-    } catch (error: any) {
-      setMutex(false);
-      toast({
-        title: "Error",
-        description:
-          error.message ?? "Error accepting assignment. Please try again later",
-        variant: "destructive",
-      });
-    }
-  }
+
   return (
     <div className="border-[2px] border-primary/10 rounded-lg p-4 w-full flex flex-col gap-4">
       <div className="flex items-center justify-between">
