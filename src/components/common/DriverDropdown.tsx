@@ -148,11 +148,11 @@ export default function DriverDropdown({
           </FormItem>
         )}
       />
-      {showMap && (
+      {/* {showMap && (
         <>
           <Map location={location} />
         </>
-      )}
+      )} */}
     </>
   );
 }
