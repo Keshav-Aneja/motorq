@@ -11,3 +11,97 @@
     scale: 96%;
   }
 }
+.anim-1 {
+  animation: scaleping1 1.5s 0s ease-in-out forwards;
+  width: 5%;
+}
+.anim-2 {
+  animation: scaleping 1s 1s ease-in-out forwards;
+  width: 5%;
+}
+.anim-3 {
+  animation: scaleping3 0.5s 1.5s ease-in-out forwards;
+  width: 5%;
+}
+.anim-4 {
+  animation: scaleping4 0.5s 2.25s ease-in-out forwards;
+  width: 5%;
+}
+.anim-6 {
+  animation: scaleping5 0.5s 2.25s ease-in-out forwards;
+  width: 5%;
+}
+.opacityPing {
+  animation: scaler 0.1s 1.5s ease-in-out forwards;
+  scale: 0% 0%;
+}
+@keyframes scaler {
+  from {
+    scale: 0% 0%;
+  }
+  to {
+    scale: 100% 100%;
+  }
+}
+@keyframes scaleping1 {
+  from {
+    width: 5%;
+  }
+  to {
+    width: 25%;
+  }
+}
+@keyframes scaleping3 {
+  from {
+    width: 5%;
+  }
+  to {
+    width: 65%;
+  }
+}
+@keyframes scaleping {
+  from {
+    width: 5%;
+  }
+  to {
+    width: 45%;
+  }
+}
+@keyframes scaleping4 {
+  from {
+    width: 5%;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes scaleping5 {
+  from {
+    width: 5%;
+  }
+  to {
+    width: 150%;
+  }
+}
+.animate-text {
+  animation: fadein 0.5s 2.5s ease-in-out forwards;
+  opacity: 0;
+  scale: 0% 0%;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+    scale: 70% 70%;
+  }
+  to {
+    scale: 100% 100%;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .hideit {
+    display: none;
+  }
+}

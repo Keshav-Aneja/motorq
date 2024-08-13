@@ -86,7 +86,6 @@ export async function getAllAvailableDrivers(data: {
           0
         );
 
-        // Combine the assignment end date with the end time
         const assignmentEndDateTime = new Date(assignment.endDate);
         const [assignmentEndHours, assignmentEndMinutes] = assignment.endTime
           .split(":")
@@ -313,5 +312,80 @@ export async function handleManualUnAssignment(
     throw new Error(
       error.message ?? "Cannot unassign driver from the assignment"
     );
+  }
+}
+
+export async function getUnavailableVehicleList({
+  data,
+}: {
+  data: {
+    startDate: Date;
+    startTime: string;
+    endDate: Date;
+    endTime: string;
+  };
+}) {
+  try {
+    const { startDate, startTime, endDate, endTime } = data;
+
+    const activeAssignments = await prisma.assignment.findMany({
+      where: {
+        isAssigned: true,
+      },
+      select: {
+        vecicle: true,
+        startDate: true,
+        startTime: true,
+        endDate: true,
+        endTime: true,
+      },
+    });
+
+    const selectedVehicles = activeAssignments
+      .filter((assignment) => {
+        const assignmentStartDateTime = new Date(assignment.startDate);
+        const assignmentEndDateTime = new Date(assignment.endDate);
+        const [assignmentStartHours, assignmentStartMinutes] =
+          assignment.startTime.split(":").map(Number);
+        assignmentStartDateTime.setHours(
+          assignmentStartHours,
+          assignmentStartMinutes,
+          0,
+          0
+        );
+        const [assignmentEndHours, assignmentEndMinutes] = assignment.endTime
+          .split(":")
+          .map(Number);
+        assignmentEndDateTime.setHours(
+          assignmentEndHours,
+          assignmentEndMinutes,
+          0,
+          0
+        );
+
+        const newStartDateTime = new Date(startDate);
+        const newEndDateTime = new Date(endDate);
+        const [startHours, startMinutes] = startTime.split(":").map(Number);
+        const [endHours, endMinutes] = endTime.split(":").map(Number);
+
+        newStartDateTime.setHours(startHours, startMinutes, 0, 0);
+
+        newEndDateTime.setHours(endHours, endMinutes, 0, 0);
+
+        return (
+          (newStartDateTime >= assignmentStartDateTime &&
+            newStartDateTime <= assignmentEndDateTime) ||
+          (newEndDateTime >= assignmentStartDateTime &&
+            newEndDateTime <= assignmentEndDateTime) ||
+          (newStartDateTime <= assignmentStartDateTime &&
+            newEndDateTime >= assignmentEndDateTime)
+        );
+      })
+      .map((assignment) => assignment.vecicle);
+
+    // console.log(selectedVehicles[0], selectedVehicles[1]);
+    return selectedVehicles;
+  } catch (error) {
+    throw new Error("Cannot fetch vehicle list at the moment");
   }
 }

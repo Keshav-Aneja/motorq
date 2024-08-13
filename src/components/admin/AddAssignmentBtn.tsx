@@ -28,6 +28,7 @@ import {
   createNewAssignment,
   getAllAvailableDrivers,
   getAllDrivers,
+  getUnavailableVehicleList,
 } from "@/services/admin";
 import { useGlobalContext } from "@/context/GlobalContext";
 import {
@@ -45,6 +46,7 @@ import { cn } from "@/lib/utils";
 import { isWithinRadius } from "@/helpers/haversineDistance";
 import { DriverType } from "@/constants/types/driver.types";
 import { ImSpinner2 } from "react-icons/im";
+import PostedPopup from "../common/PostedPopup";
 
 const AddDriverBtn = () => {
   const [mutex, setMutex] = useState(false);
@@ -52,6 +54,7 @@ const AddDriverBtn = () => {
   const [selectedDrivers, setSelectedDrivers] = useState<DriverTypeDetailed[]>(
     []
   );
+  const [filteredVehicles, setFilteredVehicles] = useState(vechiles);
   const [mounted, setMounted] = useState(false);
   const [allCurrentDrivers, setAllCurrentDrivers] = useState<DriverType[]>([]);
   const [location, setLocation] = useState<any>(null);
@@ -64,6 +67,44 @@ const AddDriverBtn = () => {
   });
   const [formData, setFormData] = useState<createAssignmentType | null>(null);
   const router = useRouter();
+  useEffect(() => {
+    const fetchUnavailableVehicles = async () => {
+      if (
+        form.watch("startDate") &&
+        form.watch("startTime") &&
+        form.watch("endDate") &&
+        form.watch("endTime")
+      ) {
+        try {
+          const TimeStampData = {
+            data: {
+              startDate: form.watch("startDate"),
+              startTime: form.watch("startTime"),
+              endDate: form.watch("endDate"),
+              endTime: form.watch("endTime"),
+            },
+          };
+          const blacklist = await getUnavailableVehicleList(TimeStampData);
+          setFilteredVehicles((prev) => {
+            return vechiles.filter((vehicle) => !blacklist.includes(vehicle));
+          });
+        } catch (error: any) {
+          toast({
+            title: "Error",
+            description: error.message ?? "Something went wrong",
+          });
+        }
+      }
+    };
+
+    fetchUnavailableVehicles();
+  }, [
+    form.watch("startDate"),
+    form.watch("startTime"),
+    form.watch("endDate"),
+    form.watch("endTime"),
+  ]);
+  const [postSuccessPopup, setPostSuccessPopup] = useState(false);
   async function handleAssignmentSubmission() {
     if (formData) {
       try {
@@ -77,6 +118,7 @@ const AddDriverBtn = () => {
         setOpen(false);
         setStage(1);
         router.refresh();
+        setPostSuccessPopup(true);
       } catch (error: any) {
         toast({
           title: "Error",
@@ -155,238 +197,245 @@ const AddDriverBtn = () => {
       setMounted(true);
     }
   }, []);
+
   if (!mounted) {
     return null;
   }
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <div className="flex flex-col items-center gap-2 p-4 px-8 rounded-md border-[2px] border-primary/20 border-dashed bg-main hover:bg-main/80">
-          <Image
-            src={images.Ride}
-            alt="Ride"
-            width={200}
-            height={200}
-            className="w-8 h-auto invert"
-          />
-          <p className="text-sm font-medium text-white">Assign a new ride</p>
-        </div>
-      </DialogTrigger>
-      <DialogContent
-        className={cn(
-          stage === 2 &&
-            locationTabActive &&
-            location &&
-            "w-full max-w-[80vw] max-h-[95vh] h-full"
-        )}
-      >
-        <DialogHeader>
-          <DialogTitle>
-            {stage === 1 ? "Add new assignment" : "Available Drivers"}
-          </DialogTitle>
-          <DialogDescription>
-            {stage === 1
-              ? "Fill in the details to request a ride"
-              : "Choose from the available drivers during the selected time"}
-          </DialogDescription>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className={cn(
-              "flex flex-col gap-2",
-              stage === 2 ? "hidden" : "flex"
-            )}
-          >
-            <div className="w-full grid grid-cols-2 gap-3">
-              <FormField
-                name="startDate"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">
-                      Start Date<strong>*</strong>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="date"
-                        value={field.value?.toString()}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="startTime"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">
-                      Start Time<strong>*</strong>
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} type="time" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="w-full grid grid-cols-2 gap-3">
-              <FormField
-                name="endDate"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">
-                      End Date<strong>*</strong>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="date"
-                        value={field.value?.toString()}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="endTime"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">
-                      End Time<strong>*</strong>
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} type="time" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <Dropdown
-              data={vechiles}
-              id="vehicle"
-              form={form}
-              label="Vehicle*"
+    <>
+      <PostedPopup showPopup={postSuccessPopup} label="Ride Requested " />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger>
+          <div className="flex flex-col items-center gap-2 p-4 px-8 rounded-md border-[2px] border-primary/20 border-dashed bg-main hover:bg-main/80">
+            <Image
+              src={images.Ride}
+              alt="Ride"
+              width={200}
+              height={200}
+              className="w-8 h-auto invert"
             />
-            <Button className="mt-4" disabled={mutex}>
-              Select Driver &rarr;
-            </Button>
-          </form>
-        </Form>
-        {stage === 2 && (
-          <>
-            <Form {...form}>
-              <form>
-                <Tabs defaultValue="byName" className="w-full">
-                  <TabsList>
-                    <TabsTrigger
-                      value="byName"
-                      onClick={() => setLocationTabActive(false)}
-                    >
-                      By Name or Phone
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="byLocation"
-                      onClick={() => setLocationTabActive(true)}
-                    >
-                      By Location
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="byName">
-                    {loadingDrivers && (
-                      <span className="flex items-center justify-center w-full">
-                        <p>Loading</p>
-                        <ImSpinner2 className="animate-spin" />
-                      </span>
-                    )}
-                    {!loadingDrivers && (
-                      <DriverDropdown
-                        form={form}
-                        id="driver"
-                        data={drivers as any}
-                        label="Select Driver*"
-                        onSelect={handleSelection}
-                      />
-                    )}
-                  </TabsContent>
-                  <TabsContent value="byLocation">
-                    <div className="flex flex-col gap-3">
-                      <PlaceAutoComplete
-                        setValue={setLocation}
-                        fullAdd={true}
-                      />
-                      <p className="text-xs text-muted-foreground -mt-2">
-                        Drivers within 25km of the current address will be
-                        visible
-                      </p>
-                      {location && (
+            <p className="text-sm font-medium text-white">Assign a new ride</p>
+          </div>
+        </DialogTrigger>
+        <DialogContent
+          className={cn(
+            stage === 2 &&
+              locationTabActive &&
+              location &&
+              "w-full max-w-[80vw] max-h-[95vh] h-full"
+          )}
+        >
+          <DialogHeader>
+            <DialogTitle>
+              {stage === 1 ? "Add new assignment" : "Available Drivers"}
+            </DialogTitle>
+            <DialogDescription>
+              {stage === 1
+                ? "Fill in the details to request a ride"
+                : "Choose from the available drivers during the selected time"}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className={cn(
+                "flex flex-col gap-2",
+                stage === 2 ? "hidden" : "flex"
+              )}
+            >
+              <div className="w-full grid grid-cols-2 gap-3">
+                <FormField
+                  name="startDate"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm">
+                        Start Date<strong>*</strong>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="date"
+                          value={field.value?.toString()}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="startTime"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm">
+                        Start Time<strong>*</strong>
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} type="time" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="w-full grid grid-cols-2 gap-3">
+                <FormField
+                  name="endDate"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm">
+                        End Date<strong>*</strong>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="date"
+                          value={field.value?.toString()}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="endTime"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm">
+                        End Time<strong>*</strong>
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} type="time" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {form.watch("startDate") &&
+                form.watch("startTime") &&
+                form.watch("endDate") &&
+                form.watch("endTime") && (
+                  <Dropdown
+                    data={filteredVehicles}
+                    id="vehicle"
+                    form={form}
+                    label="Vehicle*"
+                  />
+                )}
+              <Button className="mt-4" disabled={mutex}>
+                Select Driver &rarr;
+              </Button>
+            </form>
+          </Form>
+          {stage === 2 && (
+            <>
+              <Form {...form}>
+                <form>
+                  <Tabs defaultValue="byName" className="w-full">
+                    <TabsList>
+                      <TabsTrigger
+                        value="byName"
+                        onClick={() => setLocationTabActive(false)}
+                      >
+                        By Name or Phone
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="byLocation"
+                        onClick={() => setLocationTabActive(true)}
+                      >
+                        By Location
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="byName">
+                      {loadingDrivers && (
+                        <span className="flex items-center justify-center w-full gap-3">
+                          <p>Loading</p>
+                          <ImSpinner2 className="animate-spin" />
+                        </span>
+                      )}
+                      {!loadingDrivers && (
                         <DriverDropdown
                           form={form}
                           id="driver"
-                          data={allCurrentDrivers as any}
+                          data={drivers as any}
                           label="Select Driver*"
                           onSelect={handleSelection}
-                          showMap={true}
-                          location={location}
                         />
                       )}
-                      {/* <UserLocationMap /> */}
-                    </div>
-                  </TabsContent>
-                </Tabs>
-
-                <div className="w-full flex flex-col gap-2">
-                  {selectedDrivers &&
-                    selectedDrivers.map((driver) => (
-                      <div
-                        key={driver.id}
-                        className="w-full flex items-center p-2 border-[2px] border-primary/10 rounded-md text-xs justify-between"
-                      >
-                        <p>{driver.name}</p>
-                        <MdClose
-                          className="cursor-pointer w-4 h-3"
-                          onClick={() =>
-                            setSelectedDrivers((prev) => {
-                              return prev.filter(
-                                (item) => item.id !== driver.id
-                              );
-                            })
-                          }
+                    </TabsContent>
+                    <TabsContent value="byLocation">
+                      <div className="flex flex-col gap-3">
+                        <PlaceAutoComplete
+                          setValue={setLocation}
+                          fullAdd={true}
                         />
+                        <p className="text-xs text-muted-foreground -mt-2">
+                          Drivers within 25km of the current address will be
+                          visible
+                        </p>
+                        {location && (
+                          <DriverDropdown
+                            form={form}
+                            id="driver"
+                            data={allCurrentDrivers as any}
+                            label="Select Driver*"
+                            onSelect={handleSelection}
+                            showMap={true}
+                            location={location}
+                          />
+                        )}
+                        {/* <UserLocationMap /> */}
                       </div>
-                    ))}
-                </div>
-                <Button
-                  className="mt-4 w-1/2"
-                  disabled={mutex}
-                  variant="ghost"
-                  onClick={() => setStage(1)}
-                  type="button"
-                >
-                  Back
-                </Button>
-                <Button
-                  className="mt-4 w-1/2"
-                  disabled={mutex}
-                  onClick={handleAssignmentSubmission}
-                >
-                  Request Ride
-                </Button>
-              </form>
-            </Form>
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
+                    </TabsContent>
+                  </Tabs>
+                  <div className="w-full flex flex-col gap-2">
+                    {selectedDrivers &&
+                      selectedDrivers.map((driver) => (
+                        <div
+                          key={driver.id}
+                          className="w-full flex items-center p-2 border-[2px] border-primary/10 rounded-md text-xs justify-between"
+                        >
+                          <p>{driver.name}</p>
+                          <MdClose
+                            className="cursor-pointer w-4 h-3"
+                            onClick={() =>
+                              setSelectedDrivers((prev) => {
+                                return prev.filter(
+                                  (item) => item.id !== driver.id
+                                );
+                              })
+                            }
+                          />
+                        </div>
+                      ))}
+                  </div>
+                  <Button
+                    className="mt-4 w-1/2"
+                    disabled={mutex}
+                    variant="ghost"
+                    onClick={() => setStage(1)}
+                    type="button"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    className="mt-4 w-1/2"
+                    disabled={mutex}
+                    onClick={handleAssignmentSubmission}
+                  >
+                    Request Ride
+                  </Button>
+                </form>
+              </Form>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
