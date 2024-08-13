@@ -15,6 +15,7 @@ import { AssignmentDetailsType } from "@/constants/types/assignment.types";
 import { Button } from "@/components/ui/button";
 import ManualAssignmentBtn from "@/components/admin/ManualAssignmentBtn";
 import ManualUnAssignmentBtn from "@/components/admin/ManualUnAssignmentBtn";
+import Pagination from "@/components/common/Pagination";
 const AllAssignments = ({ status }: { status: string }) => {
   return (
     <Suspense fallback={<AssignmentsSkeleton />}>
@@ -26,7 +27,7 @@ const AllAssignments = ({ status }: { status: string }) => {
 
 export default AllAssignments;
 async function ActiveAssignmentsWrapper() {
-  const assignments = await getActiveAssignments(0, 10);
+  const assignments = await getActiveAssignments(0, 20);
   console.log("ACTIVE", assignments);
   return (
     <>

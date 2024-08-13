@@ -85,6 +85,7 @@ const LoginForm = () => {
                       {...field}
                       placeholder="Enter your phone number"
                       className="bg-white"
+                      type="number"
                     />
                   </FormControl>
                   <FormMessage />

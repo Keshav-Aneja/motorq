@@ -37,9 +37,82 @@ export async function handleAcceptAssignment(
     if (!assignment) {
       throw new Error("Assignment not found");
     }
-    if (assignment?.isAssigned) {
+    if (assignment.isAssigned) {
       throw new Error("Assignment already assigned");
     }
+
+    const driverAssignedAssignments = await prisma.driver.findUnique({
+      where: {
+        name: driverDetails.name,
+        driverId: driverDetails.driverId,
+      },
+      select: {
+        assignedAssignments: true,
+      },
+    });
+    if (!driverAssignedAssignments) {
+      throw new Error("Error accepting assignment. Please try again later");
+    }
+
+    const assignmentStartDateTime = new Date(assignment.startDate);
+    const [assignmentStartHours, assignmentStartMinutes] = assignment.startTime
+      .split(":")
+      .map(Number);
+    assignmentStartDateTime.setHours(
+      assignmentStartHours,
+      assignmentStartMinutes,
+      0,
+      0
+    );
+
+    const assignmentEndDateTime = new Date(assignment.endDate);
+    const [assignmentEndHours, assignmentEndMinutes] = assignment.endTime
+      .split(":")
+      .map(Number);
+    assignmentEndDateTime.setHours(
+      assignmentEndHours,
+      assignmentEndMinutes,
+      0,
+      0
+    );
+
+    // Check for conflicting assignments
+    let isConflicting = false;
+    for (
+      let i = 0;
+      i < driverAssignedAssignments.assignedAssignments.length;
+      i++
+    ) {
+      const task = JSON.parse(driverAssignedAssignments.assignedAssignments[i]);
+
+      const taskStartDateTime = new Date(task.startDate);
+      const [taskStartHours, taskStartMinutes] = task.startTime
+        .split(":")
+        .map(Number);
+      taskStartDateTime.setHours(taskStartHours, taskStartMinutes, 0, 0);
+
+      const taskEndDateTime = new Date(task.endDate);
+      const [taskEndHours, taskEndMinutes] = task.endTime
+        .split(":")
+        .map(Number);
+      taskEndDateTime.setHours(taskEndHours, taskEndMinutes, 0, 0);
+
+      if (
+        assignmentStartDateTime < taskEndDateTime &&
+        assignmentEndDateTime > taskStartDateTime
+      ) {
+        isConflicting = true;
+        break;
+      }
+    }
+
+    if (isConflicting) {
+      throw new Error(
+        "Assignment time conflicts with existing accepted assignments"
+      );
+    }
+
+    // Proceed with assignment acceptance
     const requestedTo = JSON.parse(assignment.requestedTo);
     const response = await prisma.$transaction(async (prisma) => {
       if (
@@ -56,9 +129,11 @@ export async function handleAcceptAssignment(
             driverId: driverDetails.driverId,
           },
         });
+
         if (!updatedAssignment) {
           throw new Error("Error accepting assignment. Please try again later");
         }
+
         const driver = await prisma.driver.update({
           where: {
             name: driverDetails.name,
@@ -70,12 +145,15 @@ export async function handleAcceptAssignment(
             },
           },
         });
+
         if (!driver) {
           throw new Error("Error accepting assignment. Please try again later");
         }
+
         return updatedAssignment;
       }
     });
+
     return response;
   } catch (error: any) {
     throw new Error(error.message ?? "Error accepting assignment");

@@ -3,8 +3,10 @@ import { useGlobalContext } from "@/context/GlobalContext";
 import React from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { Skeleton } from "../ui/skeleton";
+import { useRouter } from "next/navigation";
 
 const DriverProfileBox = () => {
+  const router = useRouter();
   const { loggedInDriver } = useGlobalContext();
   if (!loggedInDriver) {
     return (

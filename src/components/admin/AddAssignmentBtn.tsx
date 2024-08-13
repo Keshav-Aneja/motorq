@@ -86,6 +86,14 @@ const AddDriverBtn = () => {
     }
   }
   async function onSubmit(values: createAssignmentType) {
+    if (values.startDate < new Date()) {
+      toast({
+        title: "Error",
+        description: "Start date cannot be in the past",
+        variant: "destructive",
+      });
+      return;
+    }
     if (values.startDate > values.endDate) {
       toast({
         title: "Error",
