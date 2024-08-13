@@ -148,6 +148,7 @@ export default function DriverDropdown({
           </FormItem>
         )}
       />
+      {/* Not able to fix the deployment of the map due to time constraints */}
       {/* {showMap && (
         <>
           <Map location={location} />

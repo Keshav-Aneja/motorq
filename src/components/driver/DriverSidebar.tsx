@@ -18,7 +18,7 @@ import {
   DRIVER_ASSIGNMENTS,
   DRIVER_DASHBOARD,
 } from "@/constants/routes/driver.routes";
-const Sidebar = () => {
+const DriverSidebar = () => {
   const path = usePathname();
   const { loggedInDriver } = useGlobalContext();
   if (!loggedInDriver) return null;
@@ -37,7 +37,7 @@ const Sidebar = () => {
             <h1 className="text-xl font-semibold">
               Hey, {loggedInDriver.name}
             </h1>
-            <p className="text-sm text-muted">
+            <p className="text-sm text-muted-foreground">
               ID : {loggedInDriver?.driverId}
             </p>
           </div>
@@ -80,4 +80,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default DriverSidebar;
